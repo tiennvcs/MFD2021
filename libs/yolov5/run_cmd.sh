@@ -1,0 +1,2 @@
+# Run docker container yolov5
+docker container run --gpus all --cpus 20 -it -v /storageStudents/Datasets/ICDAR2021_MDF/:/storageStudents/Datasets/ICDAR2021_MDF/ -v /storageStudents/K2018/tiendv/tiennv/:/storageStudents/K2018/tiendv/tiennv/ -v /home/tiennv/anaconda3/:/home/tiennv/anaconda3/ --name MLCV_ICDAR-MFD-2021_tiennv_5-3-2021 ultralytics/yolov5 /bin/bash
