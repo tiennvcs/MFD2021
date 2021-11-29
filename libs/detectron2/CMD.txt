@@ -1,0 +1,163 @@
+config1: 
+Faster RCNN 
+Backbone: ResNet101 + FPN 
++ model zoo = COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml
+CUDA_VISIBLE_DEVICES=4  python train.py -p 1 -n 70000 \
+-m './model' -mz 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml' \
+-lg "./log/config1"
+
+config2 
+Faster RCNN 
+Backbone: ResNeXt-101-32x8d + FPN 
+
+CUDA_VISIBLE_DEVICES=3  python train.py -p 1 -n 100000 -w 2 -bs 2 -lg "./log/config2" \
+--model './model1' --model_zoo 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+
+num_worker = 4 
+
+config3
+Backbone: Retinet 101
+Faster RCNN 
+num_worker = 4 
+batch_size = 2 
+
+CUDA_VISIBLE_DEVICES=5  python train.py -p 1 -n 50000 -w 2 -bs 2 -lg "./log/config3" \
+-m './model2    ' -mz 'COCO-Detection/retinanet_R_101_FPN_3x.yaml'
+cmd run : CUDA_VISIBLE_DEVICES=5  python train.py -p 1 -n 50000 -w 2 -bs 2 -lg "./log/config3s" \
+-m './model3' -mz 'COCO-Detection/retinanet_R_101_FPN_3x.yaml'
+
+
+export CUDA_VISIBLE_DEVICES=3
+
+create docker 
+
+docker run --ipc=host --gpus all --name=mlcv_pxtri_detectron2_v1  --runtime=nvidia -it -v /mlcv/:/mlcv -v /dataset/:/dataset -v /home/:/home/  pxtri/detectron2:v0  /bin/bash
+
+
+=========================== =================== predict ============================================
+CUDA_VISIBLE_DEVICES=6 python predict.py \
+-i '/storageStudents/K2018/tiendv/tiennv/mfd_2021/Faster_RCNN/Faster_RCNN_PXT/valid_dataset_1' -o './result/config3' \
+--model './model2' --model_zoo 'COCO-Detection/retinanet_R_101_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6 python predict.py \
+-i '/storageStudents/K2018/tiendv/tiennv/mfd_2021/Faster_RCNN/Faster_RCNN_PXT/valid_dataset_1' -o './result/config1' \
+--model './model' --model_zoo 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6 python predict.py \
+-i '/storageStudents/K2018/tiendv/tiennv/mfd_2021/Faster_RCNN/Faster_RCNN_PXT/valid_dataset_1' -o './result/config2' \
+--model './model1' --model_zoo 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+
+cp -v -d DATASET/raw_data/Tr01/* -r DATASET/edited_data/Train_data
+cp -v -d DATASET/raw_data/Tr00/* -r DATASET/edited_data/Train_data
+cp -v -d DATASET/raw_data/Ts00/* -r DATASET/edited_data/Test_data;cp -v -d DATASET/raw_data/Ts01/* -r DATASET/edited_data/Test_data
+python ./src/convert_format_annot.py --input "DATASET/edited_data/Train_data/" --output "Annotation/Train/annotation.json"
+cp -v -d DATASET/raw_data/Tr01/* -r DATASET/edited_data/Train_data
+cp -v -d DATASET/raw_data/Tr00/* -r DATASET/edited_data/Train_data
+cp -v -d DATASET/raw_data/Ts00/* -r DATASET/edited_data/Test_data;cp -v -d DATASET/raw_data/Ts01/* -r DATASET/edited_data/Test_data
+python ./src/convert_format_annot.py --input "DATASET/edited_data/Train_data/" --output "Annotation/Train/annotation.json"
+
+python ./src/convert_format_annot.py --input "DATASET/edited_data/Valid_data/" --output "Annotation/Valid/annotation.json"
+
+python ./src/convert_format_annot.py --input "DATASET/edited_data/Test_data/" --output "Annotation/Test/annotation.json"
+
+
+CUDA_VISIBLE_DEVICES=4  python ./src/train.py -p 1 -n 360100 -lg './log/log_cfg1' \
+-m './all_model/model_cfg1' -mz 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6  python ./src/train.py -p 1 -n 400000 -bs 2 -lg './log/log_cfg2'  \
+-m './all_model/model_cfg2' -mz 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6  python ./src/train.py -p 1 -n 300100 -lg './log/log_cfg3' \
+-m './all_model/model_cfg3' -mz 'COCO-Detection/retinanet_R_101_FPN_3x.yaml'
+
+
+CUDA_VISIBLE_DEVICES=6 python ./src/predict.py \
+-i './DATASET/edited_data/Valid_data' \
+-o './output/cfg3' \
+--model './all_model/model_cfg3' \
+--model_zoo 'COCO-Detection/retinanet_R_101_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6 python ./src/predict.py \
+-i './DATASET/edited_data/Valid_data' \
+-o './output/cfg1' \
+--model './all_model/model_cfg1' \
+--model_zoo 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'
+
+CUDA_VISIBLE_DEVICES=6 python ./src/predict.py \
+-i '/storageStudents/Datasets/ICDAR2021_MDF/test/' \
+-o './output/cfg2/' \
+--model './all_model/model_cfg2' \
+--model_zoo 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+
+
+Test : 
+
+CUDA_VISIBLE_DEVICES=6 python ./src/predict.py \
+-i './DATASET/Test/raw_img' \
+-o './DATASET/Test/output' \
+--model './all_model/model_cfg1' \
+--model_zoo 'COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml'
+
+########################################################################################
+Generate submission 
+
+/storageStudents/K2018/tiendv/tiennv/mfd_2021/detectron2/TOOL_EVALUATION/Predict_folder/test_24-03model_cfg2submission.csv
+python ./TOOL_EVALUATION/evaluation.py \
+--PREDICT_FILE "./TOOL_EVALUATION/Predict_folder/Tr00model_cfg2submission.csv" \
+--GT_DIR "./DATASET/raw_data/Tr00/"
+
+
+##############################################################################################
+Train model for references 
+CUDA_VISIBLE_DEVICES=6  python ./src/train_ref.py -p 1 -n 50000 -bs 2 -lg './log/log_ref_1'  \
+-m './all_model/model_ref_1' -mz 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+###################################
+Predict references 
+
+CUDA_VISIBLE_DEVICES=6 python ./src/predict.py \
+-i './DATASET/raw_data/Va01' \
+-o './output/ref/Va01' \
+--model './all_model/model_ref_1' \
+--model_zoo 'COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml'
+
+
+############################################################################################################################################
+Use PublayNet 
+
+CUDA_VISIBLE_DEVICES=6 python infer.py \
+--image_path="../../DATASET/raw_data/Va01/0001125-page09.jpg" \
+--model_path="../model/model_196000.pth" \
+--output_path="../output/"
+
+
+path = ".DATASET/edited_data/Train_data" 
+
+======================================================================
+# Visualize 
+
+  CUDA_VISIBLE_DEVICES=6 python ./visualize.py \
+      --mode 1 \
+      --num_img 20\
+      --output ./Visualize 
+
+
+demo 
+
+python3 demo/demo.py  \
+	--config-file configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml \
+	--input input.jpg --output outputs/ \
+	--opts MODEL.WEIGHTS detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl
+
+  RUN pip install --user torch== 1.4.0 torchvision==0.5.0 -f https://download.pytorch.org/whl/cu101/torch_stable.html
+
+conda install pytorch torchvision torchaudio cudatoolkit=11.2 -c pytorch -c nvidia
+
+pip3 install torch==1.9.0+cu112 torcpip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+
+sudo pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
+
+sudo pip3 install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
