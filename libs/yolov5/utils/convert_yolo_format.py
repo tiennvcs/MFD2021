@@ -61,10 +61,10 @@ def convert_to_structure(img_paths, annotation_paths, data_dir, output_dir):
 
         # Read groundtruth file
         img_file = ntpath.basename(img_path)
-        gt_path = os.path.join(data_dir,img_file.split(".")[0] + '.txt')
-        # doc_id = img_file.split("-")[0]
-        # page_id = img_file.split("-")[1].split(".")[0][4:]
-        # gt_path = os.path.join(data_dir, doc_id + '-color_page' + page_id + '.txt')
+        #gt_path = os.path.join(data_dir,img_file.split(".")[0] + '.txt')
+        doc_id = img_file.split("-")[0]
+        page_id = img_file.split("-")[1].split(".")[0][4:]
+        gt_path = os.path.join(data_dir, doc_id + '-color_page' + page_id + '.txt')
 
 
         if not os.path.exists(gt_path):
