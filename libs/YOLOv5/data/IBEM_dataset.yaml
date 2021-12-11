@@ -7,4 +7,4 @@ test: /mlcv/WorkingSpace/NCKH/tiennv/MFD2021/libs/YOLOv5/data/IBEM_data/test_dat
 nc: 2
 
 # class names
-names: [ 'embbeded', 'isolated']
+names: [ 'embedded', 'isolated']
